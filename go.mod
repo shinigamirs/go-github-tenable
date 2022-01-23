@@ -1,4 +1,4 @@
-module go-github-tenable
+module github.com/shinigamirs/go-github-tenable
 
 go 1.17
 
