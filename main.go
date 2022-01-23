@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/joho/godotenv"
+	"github.com/labstack/gommon/log"
 	"go-github-tenable/controllers"
-	"log"
 	"net/http"
 	"time"
 )
@@ -28,7 +28,7 @@ func main() {
 	defer func() {
 		err := recover()
 		if err != nil {
-			log.Println("Panic in go-git initialization.", "error", err)
+			log.Info("Panic in go-git initialization.", "error", err)
 		}
 	}()
 	configureHTTPDefaultTransport()
@@ -39,8 +39,8 @@ func main() {
 		Handler:     e,
 		ReadTimeout: 30 * time.Second,
 	}
+	log.Info("Server Started on 8080")
 	if err := s.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
-
 }

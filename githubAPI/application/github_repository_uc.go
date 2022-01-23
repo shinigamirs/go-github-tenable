@@ -72,12 +72,15 @@ func GithubListRepository(c echo.Context) error {
 
 // GithubCreateRepo create a repo under auth user
 func GithubCreateRepo(c echo.Context) error {
-	var repo github.Repository
+	var param createBranchParam
 	client, err := createGithubClient(c)
 	if err != nil {
 		return err
 	}
-	err = c.Bind(&repo)
+	err = c.Bind(&param)
+	repo := github.Repository{
+		Name: &param.RepoName,
+	}
 	if err != nil {
 		return err
 	}
