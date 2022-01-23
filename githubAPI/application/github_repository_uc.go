@@ -31,25 +31,25 @@ type createPullRequestParam struct {
 	Base      string `json:"base" validate:"required"`
 }
 
+var ctx = context.Background()
+
 // createGithubClient return a github client
-func createGithubClient(c echo.Context) (*github.Client, error, context.Context) {
+func createGithubClient(c echo.Context) (*github.Client, error) {
 	sess, err := session.Get("session", c)
 	if err != nil {
-		return nil, err, nil
+		return nil, err
 	}
-	// creates an empty context
-	ctx := context.Background()
 	accessToken := sess.Values["access_token"]
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: accessToken.(string)},
 	)
 	tc := oauth2.NewClient(ctx, ts)
-	return github.NewClient(tc), nil, ctx
+	return github.NewClient(tc), nil
 }
 
 // GithubListRepository endpoint for listing repository
 func GithubListRepository(c echo.Context) error {
-	client, err, ctx := createGithubClient(c)
+	client, err := createGithubClient(c)
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func GithubListRepository(c echo.Context) error {
 // GithubCreateRepo create a repo under auth user
 func GithubCreateRepo(c echo.Context) error {
 	var repo github.Repository
-	client, err, ctx := createGithubClient(c)
+	client, err := createGithubClient(c)
 	if err != nil {
 		return err
 	}
@@ -89,7 +89,7 @@ func GithubCreateRepo(c echo.Context) error {
 }
 
 func GithubGetRepo(c echo.Context) error {
-	client, err, ctx := createGithubClient(c)
+	client, err := createGithubClient(c)
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func GithubGetRepo(c echo.Context) error {
 
 func GithubCreateBranch(c echo.Context) error {
 	var param createBranchParam
-	client, err, ctx := createGithubClient(c)
+	client, err := createGithubClient(c)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func GithubCreateBranch(c echo.Context) error {
 
 func CreateGithubPullRequest(c echo.Context) error {
 	var param createPullRequestParam
-	client, err, ctx := createGithubClient(c)
+	client, err := createGithubClient(c)
 	if err != nil {
 		return err
 	}
@@ -167,6 +167,7 @@ func CreateGithubPullRequest(c echo.Context) error {
 	userName, _, _ := client.Users.Get(ctx, "")
 	repo, _, err := client.PullRequests.Create(ctx, *userName.Login, param.RepoName, createPullRequest)
 	if err != nil {
+		log.Error(err.Error())
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
 	}
 	log.Info("PullRequest Created Successfully")

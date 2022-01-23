@@ -15,4 +15,5 @@ func InitEcho() *echo.Echo {
 
 func AddRoutes(e *echo.Echo) {
 	AddGithubRoute(e)
+	AddLoginRoute(e)
 }

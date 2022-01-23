@@ -2,15 +2,14 @@ package controllers
 
 import (
 	"github.com/labstack/echo"
-	infrastructure "go-github-tenable/githubAPI/infrastructure"
+	"go-github-tenable/githubAPI/infrastructure"
 )
 
 func AddGithubRoute(e *echo.Echo) {
-	e.GET("/login", infrastructure.GithubLoginController)
-	e.GET("/callback/handler", infrastructure.GithubCallbackHandlerController)
-	e.GET("/github/listRepo", infrastructure.GitListRepositoryController)
-	e.POST("/github/createRepo", infrastructure.GithubCreateRepositoryController)
-	e.GET("/github/getRepo", infrastructure.GithubGetRepositoryController)
-	e.POST("/github/createBranch", infrastructure.GithubCreateBranchController)
-	e.POST("/github/createPullRequest", infrastructure.GithubCreatePullRequestController)
+	t := e.Group("/")
+	t.GET("github/listRepo", infrastructure.GitListRepositoryController)
+	t.POST("github/createRepo", infrastructure.GithubCreateRepositoryController)
+	t.GET("github/getRepo", infrastructure.GithubGetRepositoryController)
+	t.POST("github/createBranch", infrastructure.GithubCreateBranchController)
+	t.POST("github/createPullRequest", infrastructure.GithubCreatePullRequestController)
 }
