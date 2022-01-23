@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/joho/godotenv"
-	"go-git-tenable/controllers"
+	"go-github-tenable/controllers"
 	"log"
 	"net/http"
 	"time"

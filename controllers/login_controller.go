@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"github.com/labstack/echo"
-	infrastructure "go-github-tenable/githubAPI/infrastructure"
+	"github.com/labstack/echo/v4"
+	"go-github-tenable/githubAPI/infrastructure"
 )
 
 func AddLoginRoute(e *echo.Echo) {
