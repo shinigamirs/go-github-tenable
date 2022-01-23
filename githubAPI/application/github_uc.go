@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo-contrib/session"
-	domain "go-git-tenable/githubAPI/domain"
+	domain "go-github-tenable/githubAPI/domain"
 	"io/ioutil"
 	"log"
 	"net/http"
