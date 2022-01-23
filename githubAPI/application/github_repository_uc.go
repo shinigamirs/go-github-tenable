@@ -92,11 +92,13 @@ func GithubGetRepo(c echo.Context) error {
 	}
 	userName, _, _ := client.Users.Get(ctx, "")
 	repo, resp, err := client.Repositories.Get(ctx, *userName.Login, repoName)
-	if err != nil && resp.StatusCode == 404 {
-		log.Error(err)
-		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("%s repo not found", repoName))
-	} else {
-		return err
+	if err != nil {
+		if resp.StatusCode == 404 {
+			log.Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, "Repo Not Found")
+		} else {
+			return echo.NewHTTPError(http.StatusOK, err.Error())
+		}
 	}
 	return c.JSON(http.StatusOK, repo)
 }
@@ -117,22 +119,24 @@ func GithubCreateBranch(c echo.Context) error {
 	}
 	sourceBranchRefString := fmt.Sprintf("refs/heads/%s", param.SourceBranchName)
 	sourceBranchRef, resp, err := client.Git.GetRef(ctx, *userName.Login, param.RepoName, sourceBranchRefString)
-	if err != nil && resp.StatusCode == 404 {
-		log.Error(err)
-		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("%s repo not found", param.RepoName))
+	if err != nil {
+		if resp.StatusCode == 404 {
+			log.Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, "Repo Not Found")
+		} else {
+			return echo.NewHTTPError(http.StatusOK, err.Error())
+		}
 	}
 	newBranchRefString := fmt.Sprintf("refs/heads/%s", param.DestinationBranchName)
 	*sourceBranchRef.Ref = newBranchRefString
 	newBranchRef, resp, err := client.Git.CreateRef(ctx, *userName.Login, param.RepoName, sourceBranchRef)
-	if err != nil && resp.StatusCode == 404 {
-		log.Error(err)
-		return echo.NewHTTPError(http.StatusNotFound, "Repo Not Found")
-	} else {
-		return echo.NewHTTPError(http.StatusOK, err.Error())
+	if err != nil {
+		if resp.StatusCode == 404 {
+			log.Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, "Repo Not Found")
+		} else {
+			return echo.NewHTTPError(http.StatusOK, err.Error())
+		}
 	}
 	return c.JSON(http.StatusOK, newBranchRef)
-}
-
-func createGithubPullRequest(c echo.Context) {
-	
 }
