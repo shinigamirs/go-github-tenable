@@ -24,3 +24,7 @@ func GithubCreateRepositoryController(c echo.Context) error {
 func GithubGetRepositoryController(c echo.Context) error {
 	return application.GithubGetRepo(c)
 }
+
+func GithubCreateBranchController(c echo.Context) error {
+	return application.GithubCreateBranch(c)
+}

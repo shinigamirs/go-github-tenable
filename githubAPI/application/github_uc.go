@@ -67,11 +67,11 @@ func GithubLogin(c echo.Context) error {
 
 	// Create the dynamic redirect URL for login
 	redirectURL := fmt.Sprintf(
-		"https://github.com/login/oauth/authorize?client_id=%s&redirect_uri="+
+		"https://github.com/login/oauth/authorize?client_id=%s&scope=repo&redirect_uri="+
 			"http://%s:%s/callback/handler", githubClientID, host, port,
 	)
 	log.Println("Redirect URL", redirectURL)
-	return c.Redirect(http.StatusPermanentRedirect, redirectURL)
+	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
 
 func GithubLoginCallbackHandler(c echo.Context) error {
