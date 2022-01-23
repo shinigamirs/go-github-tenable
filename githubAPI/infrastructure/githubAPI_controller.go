@@ -2,7 +2,7 @@ package infrastructure
 
 import (
 	"github.com/labstack/echo"
-	"go-git-tenable/githubAPI/application"
+	"go-github-tenable/githubAPI/application"
 )
 
 func GithubLoginController(c echo.Context) error {
@@ -27,4 +27,8 @@ func GithubGetRepositoryController(c echo.Context) error {
 
 func GithubCreateBranchController(c echo.Context) error {
 	return application.GithubCreateBranch(c)
+}
+
+func GithubCreatePullRequestController(c echo.Context) error {
+	return application.CreateGithubPullRequest(c)
 }

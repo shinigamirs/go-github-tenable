@@ -19,9 +19,16 @@ type githubRepositoryListOutput struct {
 
 type createBranchParam struct {
 	RepoName              string `json:"repoName" validate:"required"`
-	SourceBranchName      string `json:"SourceBranchName" default:"main"`
-	DestinationBranchName string `json:"DestinationBranchName" validate:"required"`
+	SourceBranchName      string `json:"sourceBranchName" default:"main"`
+	DestinationBranchName string `json:"destinationBranchName" validate:"required"`
 	Private               bool   `json:"private"`
+}
+
+type createPullRequestParam struct {
+	RepoName  string `json:"repoName" validate:"required"`
+	PrSubject string `json:"prSubject" validate:"required"`
+	Head      string `json:"head" validate:"required"`
+	Base      string `json:"base" validate:"required"`
 }
 
 // createGithubClient return a github client
@@ -93,8 +100,8 @@ func GithubGetRepo(c echo.Context) error {
 	userName, _, _ := client.Users.Get(ctx, "")
 	repo, resp, err := client.Repositories.Get(ctx, *userName.Login, repoName)
 	if err != nil {
+		log.Error(err)
 		if resp.StatusCode == 404 {
-			log.Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, "Repo Not Found")
 		} else {
 			return echo.NewHTTPError(http.StatusOK, err.Error())
@@ -113,15 +120,15 @@ func GithubCreateBranch(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	userName, _, _ := client.Users.Get(ctx, "")
 	if param.SourceBranchName == "" {
 		param.SourceBranchName = "master"
 	}
+	userName, _, _ := client.Users.Get(ctx, "")
 	sourceBranchRefString := fmt.Sprintf("refs/heads/%s", param.SourceBranchName)
 	sourceBranchRef, resp, err := client.Git.GetRef(ctx, *userName.Login, param.RepoName, sourceBranchRefString)
 	if err != nil {
+		log.Error(err)
 		if resp.StatusCode == 404 {
-			log.Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, "Repo Not Found")
 		} else {
 			return echo.NewHTTPError(http.StatusOK, err.Error())
@@ -131,12 +138,37 @@ func GithubCreateBranch(c echo.Context) error {
 	*sourceBranchRef.Ref = newBranchRefString
 	newBranchRef, resp, err := client.Git.CreateRef(ctx, *userName.Login, param.RepoName, sourceBranchRef)
 	if err != nil {
+		log.Error(err)
 		if resp.StatusCode == 404 {
-			log.Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, "Repo Not Found")
 		} else {
 			return echo.NewHTTPError(http.StatusOK, err.Error())
 		}
 	}
+	log.Info(fmt.Sprintf("Branch %s Created Successfully", param.DestinationBranchName))
 	return c.JSON(http.StatusOK, newBranchRef)
+}
+
+func CreateGithubPullRequest(c echo.Context) error {
+	var param createPullRequestParam
+	client, err, ctx := createGithubClient(c)
+	if err != nil {
+		return err
+	}
+	err = c.Bind(&param)
+	if err != nil {
+		return err
+	}
+	createPullRequest := &github.NewPullRequest{
+		Title: &param.PrSubject,
+		Head:  &param.Head,
+		Base:  &param.Base,
+	}
+	userName, _, _ := client.Users.Get(ctx, "")
+	repo, _, err := client.PullRequests.Create(ctx, *userName.Login, param.RepoName, createPullRequest)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
+	}
+	log.Info("PullRequest Created Successfully")
+	return c.JSON(http.StatusOK, repo)
 }
