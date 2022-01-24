@@ -91,6 +91,7 @@ func GithubCreateRepo(c echo.Context) error {
 	return c.JSON(http.StatusCreated, repos)
 }
 
+// GithubGetRepo endpoint to get repo
 func GithubGetRepo(c echo.Context) error {
 	client, err := createGithubClient(c)
 	if err != nil {
@@ -113,6 +114,7 @@ func GithubGetRepo(c echo.Context) error {
 	return c.JSON(http.StatusOK, repo)
 }
 
+// GithubCreateBranch endpoint to create branch
 func GithubCreateBranch(c echo.Context) error {
 	var param createBranchParam
 	client, err := createGithubClient(c)
@@ -152,6 +154,7 @@ func GithubCreateBranch(c echo.Context) error {
 	return c.JSON(http.StatusOK, newBranchRef)
 }
 
+// CreateGithubPullRequest endpoint to create pull request
 func CreateGithubPullRequest(c echo.Context) error {
 	var param createPullRequestParam
 	client, err := createGithubClient(c)

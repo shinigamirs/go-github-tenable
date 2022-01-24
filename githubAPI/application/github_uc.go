@@ -4,16 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
-	domain "go-github-tenable/githubAPI/domain"
+	"github.com/labstack/gommon/log"
+	"go-github-tenable/githubAPI/domain"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 )
 
+// getGithubAccessToken is to get the github access token
 func getGithubAccessToken(code string) string {
 
 	clientID, _ := domain.GetGithubClientID()
@@ -22,6 +22,7 @@ func getGithubAccessToken(code string) string {
 	requestBodyMap := map[string]string{"client_id": clientID, "client_secret": clientSecret, "code": code}
 	requestJSON, _ := json.Marshal(requestBodyMap)
 
+	// request to github to get accessToken
 	req, reqErr := http.NewRequest("POST", "https://github.com/login/oauth/access_token",
 		bytes.NewBuffer(requestJSON))
 	if reqErr != nil {
@@ -32,7 +33,7 @@ func getGithubAccessToken(code string) string {
 
 	resp, respErr := http.DefaultClient.Do(req)
 	if respErr != nil {
-		log.Panic("Request failed")
+		log.Panic("Github Request failed")
 	}
 
 	respBody, _ := ioutil.ReadAll(resp.Body)
@@ -50,8 +51,8 @@ func getGithubAccessToken(code string) string {
 	return githubResponse.AccessToken
 }
 
+// GithubLogin is to login in github using oauth
 func GithubLogin(c echo.Context) error {
-	// Get the environment variable
 	githubClientID, err := domain.GetGithubClientID()
 	if err != nil {
 		return err
@@ -70,20 +71,18 @@ func GithubLogin(c echo.Context) error {
 		"https://github.com/login/oauth/authorize?client_id=%s&scope=repo&redirect_uri="+
 			"http://%s:%s/callback/handler", githubClientID, host, port,
 	)
-	log.Println("Redirect URL", redirectURL)
+	log.Info("Redirect URL", redirectURL)
 	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
 
+// GithubLoginCallbackHandler to store access_token in session
 func GithubLoginCallbackHandler(c echo.Context) error {
+	// To get the code out of github login url
 	code := c.QueryParam("code")
 	githubAccessToken := getGithubAccessToken(code)
 	sess, _ := session.Get("session", c)
-	sess.Options = &sessions.Options{
-		Path:   "/",
-		MaxAge: 86400 * 7,
-	}
-	log.Println("Access_Token", githubAccessToken)
 	sess.Values["access_token"] = githubAccessToken
 	sess.Save(c.Request(), c.Response())
+	log.Info("Call back handler done")
 	return c.Redirect(http.StatusTemporaryRedirect, "/github/listRepo")
 }
