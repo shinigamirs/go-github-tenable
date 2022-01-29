@@ -11,12 +11,14 @@ import (
 	"net/http"
 )
 
+//githubRepositoryListOutput struct for listing repository
 type githubRepositoryListOutput struct {
 	Name        string `json:"name"`
 	FullName    string `json:"fullName"`
 	Description string `json:"description"`
 }
 
+//createBranchParam struct for creating branch
 type createBranchParam struct {
 	RepoName              string `json:"repoName" validate:"required"`
 	SourceBranchName      string `json:"sourceBranchName" default:"main"`
@@ -24,11 +26,22 @@ type createBranchParam struct {
 	Private               bool   `json:"private"`
 }
 
+//createPullRequestParam struct for creating pull request
 type createPullRequestParam struct {
 	RepoName  string `json:"repoName" validate:"required"`
 	PrSubject string `json:"prSubject" validate:"required"`
 	Head      string `json:"head" validate:"required"`
 	Base      string `json:"base" validate:"required"`
+}
+
+//createFileContentParam struct for creating a file in github
+type createFileContentParam struct {
+	RepoName    string `json:"repoName" validate:"required"`
+	BranchName  string `json:"branchName" validate:"required"`
+	FileName    string `json:"fileName" validate:"required"`
+	FileContent string `json:"fileContent" validate:"required"`
+	Path        string `json:"path" validate:"required"`
+	Message     string `json:"message" validate:"required"`
 }
 
 var ctx = context.Background()
@@ -178,4 +191,36 @@ func CreateGithubPullRequest(c echo.Context) error {
 	}
 	log.Info("PullRequest Created Successfully")
 	return c.JSON(http.StatusOK, repo)
+}
+
+// CreateRepositoryContent creates a file with base64 content and commit using the message
+func CreateRepositoryContent(c echo.Context) error {
+	var createFileParam createFileContentParam
+	client, err := createGithubClient(c)
+	if err != nil {
+		return err
+	}
+	err = c.Bind(&createFileParam)
+	repositoryFileContent := &github.RepositoryContentFileOptions{
+		Message: &createFileParam.Message,
+		Content: []byte(createFileParam.FileContent),
+		Branch:  &createFileParam.BranchName,
+	}
+	if createFileParam.Path == "" {
+		createFileParam.Path = createFileParam.FileName
+	}
+	userName, _, _ := client.Users.Get(ctx, "")
+	content, resp, err := client.Repositories.CreateFile(ctx, *userName.Login, createFileParam.RepoName, createFileParam.Path,
+		repositoryFileContent)
+	if err != nil {
+		log.Error(err.Error())
+		if resp.StatusCode == http.StatusNotFound {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		} else if resp.StatusCode == http.StatusConflict {
+			return echo.NewHTTPError(http.StatusConflict, err.Error())
+		} else {
+			return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
+		}
+	}
+	return c.JSON(http.StatusOK, content)
 }

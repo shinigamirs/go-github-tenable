@@ -31,4 +31,5 @@ func AddGithubRoute(e *echo.Echo) {
 	t.GET("github/getRepo", infrastructure.GithubGetRepositoryController)
 	t.POST("github/createBranch", infrastructure.GithubCreateBranchController)
 	t.POST("github/createPullRequest", infrastructure.GithubCreatePullRequestController)
+	t.POST("github/createContent", infrastructure.GithubCreateContentRequestController)
 }

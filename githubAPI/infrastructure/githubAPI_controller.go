@@ -5,12 +5,12 @@ import (
 	"go-github-tenable/githubAPI/application"
 )
 
-// GithubLoginController is the controller for github login
+// GithubLoginController is the controller for GitHub login
 func GithubLoginController(c echo.Context) error {
 	return application.GithubLogin(c)
 }
 
-// GitListRepositoryController is the controller for github list repo
+// GitListRepositoryController is the controller for GitHub list repo
 func GitListRepositoryController(c echo.Context) error {
 	return application.GithubListRepository(c)
 }
@@ -20,22 +20,27 @@ func GithubCallbackHandlerController(c echo.Context) error {
 	return application.GithubLoginCallbackHandler(c)
 }
 
-// GithubCreateRepositoryController is the controller to create repository from Github
+// GithubCreateRepositoryController is the controller to create repository from GitHub
 func GithubCreateRepositoryController(c echo.Context) error {
 	return application.GithubCreateRepo(c)
 }
 
-// GithubGetRepositoryController is the controller to get repository from Github
+// GithubGetRepositoryController is the controller to get repository from GitHub
 func GithubGetRepositoryController(c echo.Context) error {
 	return application.GithubGetRepo(c)
 }
 
-// GithubCreateBranchController is the controller to create branch in Github repository
+// GithubCreateBranchController is the controller to create branch in GitHub repository
 func GithubCreateBranchController(c echo.Context) error {
 	return application.GithubCreateBranch(c)
 }
 
-// GithubCreatePullRequestController is the controller to create pull request in Github
+// GithubCreatePullRequestController is the controller to create pull request in GitHub
 func GithubCreatePullRequestController(c echo.Context) error {
 	return application.CreateGithubPullRequest(c)
+}
+
+// GithubCreateContentRequestController is the controller to create file in GitHub repository
+func GithubCreateContentRequestController(c echo.Context) error {
+	return application.CreateRepositoryContent(c)
 }
