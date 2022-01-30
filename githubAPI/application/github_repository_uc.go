@@ -91,11 +91,15 @@ func GithubCreateRepo(c echo.Context) error {
 		return err
 	}
 	err = c.Bind(&param)
-	repo := github.Repository{
-		Name: &param.RepoName,
-	}
 	if err != nil {
 		return err
+	}
+	err = c.Validate(param)
+	if err != nil {
+		return err
+	}
+	repo := github.Repository{
+		Name: &param.RepoName,
 	}
 	repos, _, err := client.Repositories.Create(ctx, "", &repo)
 	if err != nil {
@@ -135,6 +139,10 @@ func GithubCreateBranch(c echo.Context) error {
 		return err
 	}
 	err = c.Bind(&param)
+	if err != nil {
+		return err
+	}
+	err = c.Validate(param)
 	if err != nil {
 		return err
 	}
@@ -178,6 +186,10 @@ func CreateGithubPullRequest(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	err = c.Validate(param)
+	if err != nil {
+		return err
+	}
 	createPullRequest := &github.NewPullRequest{
 		Title: &param.PrSubject,
 		Head:  &param.Head,
@@ -201,6 +213,13 @@ func CreateRepositoryContent(c echo.Context) error {
 		return err
 	}
 	err = c.Bind(&createFileParam)
+	if err != nil {
+		return err
+	}
+	err = c.Validate(createFileParam)
+	if err != nil {
+		return err
+	}
 	repositoryFileContent := &github.RepositoryContentFileOptions{
 		Message: &createFileParam.Message,
 		Content: []byte(createFileParam.FileContent),
