@@ -26,6 +26,13 @@ type createBranchParam struct {
 	Private               bool   `json:"private"`
 }
 
+//createRepoParam struct for creating repo
+type createRepoParam struct {
+	RepoName    string `json:"repoName" validate:"required"`
+	Private     bool   `json:"private"`
+	Description string `json:"description, omitempty"`
+}
+
 //createPullRequestParam struct for creating pull request
 type createPullRequestParam struct {
 	RepoName  string `json:"repoName" validate:"required"`
@@ -85,7 +92,7 @@ func GithubListRepository(c echo.Context) error {
 
 // GithubCreateRepo create a repo under auth user
 func GithubCreateRepo(c echo.Context) error {
-	var param createBranchParam
+	var param createRepoParam
 	client, err := createGithubClient(c)
 	if err != nil {
 		return err
@@ -147,7 +154,7 @@ func GithubCreateBranch(c echo.Context) error {
 		return err
 	}
 	if param.SourceBranchName == "" {
-		param.SourceBranchName = "master"
+		param.SourceBranchName = "main"
 	}
 	userName, _, _ := client.Users.Get(ctx, "")
 	sourceBranchRefString := fmt.Sprintf("refs/heads/%s", param.SourceBranchName)
